@@ -218,32 +218,38 @@
 }
 
         // Event listeners
-        messageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const content = messageInput.value.trim();
-            if (content) {
-                appendMessage(content, true);
-                sendMessage(content);
-            }
-        });
+        // 1. Modify your form submission handler
+messageForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const content = messageInput.value.trim();
+    if (content) {
+        // Remove the immediate UI update - this is what's causing duplicates
+        // appendMessage(content, true); <-- Remove this line
+        
+        // Just send the message to the server
+        sendMessage(content);
+        
+        // Clear input immediately for better UX
+        messageInput.value = '';
+    }
+});
 
         // Listen for real-time messages
-        socket.on('newMessage', data => {
-            console.log('Received message:', data);
-            
-            // Only process messages for our conversation
-            if (data.conversation_id !== conversationId) {
-                return;
-            }
-            
-            // Skip messages sent by the current user
-            if (data.user_id === authId) {
-                return;
-            }
-            
-            // Display the message
-            appendMessage(data.message, false);
-        });
+        // Socket.io will handle all message display:
+socket.on('newMessage', data => {
+    console.log('Received message:', data);
+    
+    // Only process messages for our conversation
+    if (data.conversation_id !== conversationId) {
+        return;
+    }
+    
+    // Determine if it's a message from the current user
+    const isSender = parseInt(data.user_id) === authId;
+    
+    // Display the message with appropriate styling
+    appendMessage(data.message, isSender);
+});
 
         // Socket connection error handling
         socket.on('connect_error', (error) => {

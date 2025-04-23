@@ -1,12 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Conversation;
 use App\Models\User;
 use App\Models\Message;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 
 class ConversationController extends Controller
@@ -22,51 +20,37 @@ class ConversationController extends Controller
         $otherUserId = $request->user_id;
         
         try {
-            // Find conversations where both users have sent messages
-            $conversationIds = Message::where('user_id', $authUser->id)
+            // Check if these two users already share a direct conversation
+            $sharedConversationId = DB::table('user_conversation')
+                ->whereIn('user_id', [$authUser->id, $otherUserId])
+                ->groupBy('conversation_id')
+                ->havingRaw('COUNT(DISTINCT user_id) = 2')
+                ->having(DB::raw('COUNT(*)'), '=', 2)
                 ->pluck('conversation_id')
-                ->unique();
-                
-            $sharedConversations = Message::whereIn('conversation_id', $conversationIds)
-                ->where('user_id', $otherUserId)
-                ->pluck('conversation_id')
-                ->unique();
+                ->first();
             
-            // Check if we have a direct conversation (only 2 participants)
-            $directConversation = null;
-            
-            foreach ($sharedConversations as $convId) {
-                $uniqueParticipants = Message::where('conversation_id', $convId)
-                    ->distinct('user_id')
-                    ->pluck('user_id');
-                
-                if ($uniqueParticipants->count() === 2) {
-                    $directConversation = Conversation::find($convId);
-                    break;
-                }
-            }
-            
-            // If no direct conversation exists, create one
-            if (!$directConversation) {
+            if ($sharedConversationId) {
+                // Conversation exists, get it
+                $conversation = Conversation::find($sharedConversationId);
+            } else {
+                // No conversation exists, create one
                 DB::beginTransaction();
                 
-                $directConversation = new Conversation();
-                $directConversation->name = null; // null name indicates a direct chat
-                $directConversation->save();
+                $conversation = new Conversation();
+                $conversation->name = null; // null name indicates a direct chat
+                $conversation->save();
                 
-                // We don't need to create a welcome message, but we could:
-                // $message = new Message([
-                //     'user_id' => $authUser->id,
-                //     'conversation_id' => $directConversation->id,
-                //     'message' => 'Started a conversation'
-                // ]);
-                // $message->save();
+                // Add both users to the pivot table
+                DB::table('user_conversation')->insert([
+                    ['user_id' => $authUser->id, 'conversation_id' => $conversation->id],
+                    ['user_id' => $otherUserId, 'conversation_id' => $conversation->id]
+                ]);
                 
                 DB::commit();
             }
             
             return response()->json([
-                'conversation' => $directConversation,
+                'conversation' => $conversation,
             ], 200);
             
         } catch (\Exception $e) {
