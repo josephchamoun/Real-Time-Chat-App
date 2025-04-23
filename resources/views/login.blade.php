@@ -166,7 +166,7 @@
     </form>
     
     <p class="text-center mt-4 text-sm">
-      Don't have an account? <a href="register.html">Sign up</a>
+      Don't have an account? <a href="register">Sign up</a>
     </p>
   </div>
 

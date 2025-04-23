@@ -183,7 +183,7 @@
     </form>
     
     <p class="text-center mt-4 text-sm">
-      Already have an account? <a href="login.html">Sign in</a>
+      Already have an account? <a href="login">Sign in</a>
     </p>
   </div>
 
