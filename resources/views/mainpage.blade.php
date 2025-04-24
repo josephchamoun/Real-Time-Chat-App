@@ -262,6 +262,7 @@
                 fetchUsers();
             }
         }
+       
         
         // Event listeners for buttons
         document.getElementById('refreshBtn').addEventListener('click', fetchUsers);
@@ -318,8 +319,8 @@
                 
                 if (Array.isArray(data.users) && data.users.length > 0) {
                     // Filter out current user if needed (assuming we know current user ID)
-                    const currentUserId = 1; // Replace with actual current user ID from auth
-                    const otherUsers = data.users.filter(user => user.id !== currentUserId);
+                
+                    const otherUsers = data.users.filter(user => user.id !== localStorage.getItem('user_id'));
                     
                     if (otherUsers.length === 0) {
                         // Show empty state if no other users
@@ -329,9 +330,11 @@
                     
                     // Show users container
                     usersContainer.style.display = 'grid';
-                    
+                    const authId = localStorage.getItem('user_id');
                     // Generate user cards
                     otherUsers.forEach(user => {
+
+                        if(user.id == authId) return; // Skip the logged-in user
                         // Determine online status (random for demo)
                         const isOnline = Math.random() > 0.5;
                         const statusClass = isOnline ? 'online' : 'offline';

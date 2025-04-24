@@ -15,7 +15,7 @@ class ConversationController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
         
-        // Get authenticated user (or default to user 1 during development)
+        // Get authenticated user 
         $authUser = auth()->user();
         $otherUserId = $request->user_id;
         
