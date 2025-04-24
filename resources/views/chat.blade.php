@@ -380,7 +380,7 @@
         const otherUserId = parseInt(pathParts[pathParts.length - 1]);
 
         // Configuration
-        const authId = localStorage.getItem('user_id') || 1; // The authenticated user ID - ideally from your auth system
+        const authId = localStorage.getItem('user_id'); // The authenticated user ID - ideally from your auth system
         let conversationId = null; // Will be determined after fetching or creating conversation
         let otherUserName = 'User'; // Store the name of the other user
 

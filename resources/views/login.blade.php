@@ -201,6 +201,8 @@
           
           // Store token in localStorage
           localStorage.setItem("token", result.token);
+          // Also store user ID
+          localStorage.setItem("user_id", result.user.id);
           
           // Redirect to main page after a brief delay
           setTimeout(() => {
