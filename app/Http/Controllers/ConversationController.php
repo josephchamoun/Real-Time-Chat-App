@@ -16,7 +16,7 @@ class ConversationController extends Controller
         ]);
         
         // Get authenticated user (or default to user 1 during development)
-        $authUser = auth()->user() ?? User::find(1);
+        $authUser = auth()->user();
         $otherUserId = $request->user_id;
         
         try {
