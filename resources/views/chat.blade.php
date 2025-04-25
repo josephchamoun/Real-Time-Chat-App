@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat | Chat App</title>
+    <title>Chat App</title>
     <style>
         :root {
             --primary-color: #4F46E5;
@@ -228,6 +228,7 @@
 
         .chat-input-form {
             display: flex;
+            align-items: center;
             gap: 0.75rem;
         }
 
@@ -284,25 +285,6 @@
             font-size: 0.95rem;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-            .chat-header {
-                padding: 0.75rem 1rem;
-            }
-
-            .chat-messages {
-                padding: 1rem;
-            }
-
-            .message-wrapper {
-                max-width: 90%;
-            }
-
-            .chat-input-container {
-                padding: 0.75rem;
-            }
-        }
-
         /* Alert messages */
         .alert {
             padding: 0.75rem 1rem;
@@ -322,6 +304,132 @@
             0% { opacity: 1; }
             70% { opacity: 1; }
             100% { opacity: 0; }
+        }
+
+        /* Emoji Picker Styles */
+        .emoji-container {
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .emoji-toggle {
+            background: none;
+            border: none;
+            color: #6B7280;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .emoji-toggle:hover {
+            background-color: #F3F4F6;
+            color: var(--primary-color);
+        }
+
+        .emoji-picker {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+            width: 320px;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.75rem;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+
+        .emoji-categories {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .emoji-category {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.25rem;
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .emoji-category.active {
+            background-color: #F3F4F6;
+        }
+
+        .emoji-search {
+            margin-bottom: 0.75rem;
+        }
+
+        .emoji-search input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .emoji-container-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .emoji-list {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+        }
+
+        .emoji-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+
+        .emoji-item:hover {
+            background-color: #F3F4F6;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .chat-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .chat-messages {
+                padding: 1rem;
+            }
+
+            .message-wrapper {
+                max-width: 90%;
+            }
+
+            .chat-input-container {
+                padding: 0.75rem;
+            }
+            
+            .emoji-picker {
+                width: 280px;
+                left: -50px;
+            }
+            
+            .emoji-list {
+                grid-template-columns: repeat(6, 1fr);
+            }
         }
     </style>
 </head>
@@ -346,7 +454,7 @@
             <div class="actions">
                 <button class="action-btn" title="Refresh messages" id="refresh-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
                     </svg>
                 </button>
             </div>
@@ -362,6 +470,34 @@
 
         <div class="chat-input-container">
             <form id="message-form" class="chat-input-form">
+                <div class="emoji-container">
+                    <button type="button" id="emoji-toggle" class="emoji-toggle" title="Add emoji">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                    </button>
+                    <div id="emoji-picker" class="emoji-picker">
+                        <div class="emoji-categories">
+                            <button data-category="smileys" class="emoji-category active">😊</button>
+                            <button data-category="people" class="emoji-category">👋</button>
+                            <button data-category="animals" class="emoji-category">🐶</button>
+                            <button data-category="food" class="emoji-category">🍕</button>
+                            <button data-category="activities" class="emoji-category">⚽</button>
+                            <button data-category="travel" class="emoji-category">🚗</button>
+                            <button data-category="objects" class="emoji-category">💡</button>
+                            <button data-category="symbols" class="emoji-category">❤️</button>
+                        </div>
+                        <div class="emoji-search">
+                            <input type="text" id="emoji-search" placeholder="Search emojis...">
+                        </div>
+                        <div class="emoji-container-scroll">
+                            <div id="emoji-list" class="emoji-list"></div>
+                        </div>
+                    </div>
+                </div>
                 <input type="text" id="message-input" class="chat-input" placeholder="Type your message..." autocomplete="off">
                 <button type="submit" class="send-btn" title="Send message">
                     <svg xmlns="http://www.w3.org/2000/svg" class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -478,7 +614,7 @@
 
                 socket.on('userStoppedTyping', (data) => {
                     if (data.userId !== authId) {
-                        typingIndicator.styletypingIndicator.style.display = 'none';
+                        typingIndicator.style.display = 'none';
                     }
                 });
 
@@ -737,6 +873,9 @@
 
             // Display the message with appropriate styling
             appendMessage(data.message, isSender, data.created_at, senderName);
+
+            // Hide typing indicator
+            typingIndicator.style.display = 'none';
         });
 
         // Socket connection error handling
@@ -744,6 +883,250 @@
             console.error('Socket connection error:', error);
             showAlert('Chat connection failed. Please refresh the page.', 'error');
         });
+
+        // Emoji Picker Implementation
+        // Emoji data organized by categories
+        const emojiData = {
+            smileys: [
+                { emoji: "😀", description: "Grinning Face" },
+                { emoji: "😃", description: "Grinning Face with Big Eyes" },
+                { emoji: "😄", description: "Grinning Face with Smiling Eyes" },
+                { emoji: "😁", description: "Beaming Face with Smiling Eyes" },
+                { emoji: "😆", description: "Grinning Squinting Face" },
+                { emoji: "😅", description: "Grinning Face with Sweat" },
+                { emoji: "🤣", description: "Rolling on the Floor Laughing" },
+                { emoji: "😂", description: "Face with Tears of Joy" },
+                { emoji: "🙂", description: "Slightly Smiling Face" },
+                { emoji: "🙃", description: "Upside-Down Face" },
+                { emoji: "😉", description: "Winking Face" },
+                { emoji: "😊", description: "Smiling Face with Smiling Eyes" },
+                { emoji: "😇", description: "Smiling Face with Halo" },
+                { emoji: "😍", description: "Smiling Face with Heart-Eyes" },
+                { emoji: "🥰", description: "Smiling Face with Hearts" },
+                { emoji: "😘", description: "Face Blowing a Kiss" },
+                { emoji: "😗", description: "Kissing Face" },
+                { emoji: "☺️", description: "Smiling Face" },
+                { emoji: "😚", description: "Kissing Face with Closed Eyes" },
+                { emoji: "😙", description: "Kissing Face with Smiling Eyes" }
+            ],
+            people: [
+                { emoji: "👋", description: "Waving Hand" },
+                { emoji: "🤚", description: "Raised Back of Hand" },
+                { emoji: "✋", description: "Raised Hand" },
+                { emoji: "👌", description: "OK Hand" },
+                { emoji: "👍", description: "Thumbs Up" },
+                { emoji: "👎", description: "Thumbs Down" },
+                { emoji: "👏", description: "Clapping Hands" },
+                { emoji: "🙌", description: "Raising Hands" },
+                { emoji: "🤝", description: "Handshake" },
+                { emoji: "🤲", description: "Palms Up Together" },
+                { emoji: "🤞", description: "Crossed Fingers" },
+                { emoji: "✌️", description: "Victory Hand" },
+                { emoji: "🤟", description: "Love-You Gesture" },
+                { emoji: "👨", description: "Man" },
+                { emoji: "👩", description: "Woman" },
+                { emoji: "👦", description: "Boy" },
+                { emoji: "👧", description: "Girl" }
+            ],
+            animals: [
+                { emoji: "🐶", description: "Dog Face" },
+                { emoji: "🐱", description: "Cat Face" },
+                { emoji: "🐭", description: "Mouse Face" },
+                { emoji: "🐹", description: "Hamster Face" },
+                { emoji: "🐰", description: "Rabbit Face" },
+                { emoji: "🦊", description: "Fox Face" },
+                { emoji: "🐻", description: "Bear Face" },
+                { emoji: "🐼", description: "Panda Face" },
+                { emoji: "🐨", description: "Koala Face" },
+                { emoji: "🐯", description: "Tiger Face" },
+                { emoji: "🦁", description: "Lion Face" },
+                { emoji: "🐮", description: "Cow Face" }
+            ],
+            food: [
+                { emoji: "🍏", description: "Green Apple" },
+                { emoji: "🍎", description: "Red Apple" },
+                { emoji: "🍐", description: "Pear" },
+                { emoji: "🍊", description: "Tangerine" },
+                { emoji: "🍋", description: "Lemon" },
+                { emoji: "🍌", description: "Banana" },
+                { emoji: "🍉", description: "Watermelon" },
+                { emoji: "🍇", description: "Grapes" },
+                { emoji: "🍓", description: "Strawberry" },
+                { emoji: "🍕", description: "Pizza" },
+                { emoji: "🍔", description: "Hamburger" },
+                { emoji: "🍟", description: "French Fries" },
+                { emoji: "🍖", description: "Meat on Bone" }
+            ],
+            activities: [
+                { emoji: "⚽", description: "Soccer Ball" },
+                { emoji: "🏀", description: "Basketball" },
+                { emoji: "🏈", description: "American Football" },
+                { emoji: "⚾", description: "Baseball" },
+                { emoji: "🎾", description: "Tennis" },
+                { emoji: "🏐", description: "Volleyball" },
+                { emoji: "🎱", description: "Pool 8 Ball" },
+                { emoji: "🏓", description: "Ping Pong" }
+            ],
+            travel: [
+                { emoji: "🚗", description: "Car" },
+                { emoji: "🚕", description: "Taxi" },
+                { emoji: "🚙", description: "Sport Utility Vehicle" },
+                { emoji: "🚌", description: "Bus" },
+                { emoji: "🚎", description: "Trolleybus" },
+                { emoji: "🏎️", description: "Racing Car" },
+                { emoji: "🚓", description: "Police Car" },
+                { emoji: "🚑", description: "Ambulance" },
+                { emoji: "🚒", description: "Fire Engine" },
+                { emoji: "✈️", description: "Airplane" },
+                { emoji: "🚀", description: "Rocket" }
+            ],
+            objects: [
+                { emoji: "⌚", description: "Watch" },
+                { emoji: "📱", description: "Mobile Phone" },
+                { emoji: "💻", description: "Laptop" },
+                { emoji: "🖥️", description: "Desktop Computer" },
+                { emoji: "🖨️", description: "Printer" },
+                { emoji: "💡", description: "Light Bulb" },
+                { emoji: "💰", description: "Money Bag" },
+                { emoji: "💎", description: "Gem Stone" },
+                { emoji: "🔑", description: "Key" },
+                { emoji: "🔒", description: "Locked" }
+            ],
+            symbols: [
+                { emoji: "❤️", description: "Red Heart" },
+                { emoji: "🧡", description: "Orange Heart" },
+                { emoji: "💛", description: "Yellow Heart" },
+                { emoji: "💚", description: "Green Heart" },
+                { emoji: "💙", description: "Blue Heart" },
+                { emoji: "💜", description: "Purple Heart" },
+                { emoji: "🖤", description: "Black Heart" },
+                { emoji: "💕", description: "Two Hearts" },
+                { emoji: "💯", description: "Hundred Points" },
+                { emoji: "✅", description: "Check Mark Button" },
+                { emoji: "❌", description: "Cross Mark" }
+            ]
+        };
+
+        // DOM Elements for emoji picker
+        const emojiToggle = document.getElementById('emoji-toggle');
+        const emojiPicker = document.getElementById('emoji-picker');
+        const emojiList = document.getElementById('emoji-list');
+        const emojiSearch = document.getElementById('emoji-search');
+        const categoryButtons = document.querySelectorAll('.emoji-category');
+
+        // Current active category
+        let activeCategory = 'smileys';
+
+        // Initialize emoji picker
+        function initEmojiPicker() {
+            // Show/hide emoji picker on toggle button click
+            emojiToggle.addEventListener('click', toggleEmojiPicker);
+
+            // Close emoji picker when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!emojiPicker.contains(e.target) && e.target !== emojiToggle) {
+                    emojiPicker.style.display = 'none';
+                }
+            });
+
+            // Initialize with first category
+            renderEmojiCategory(activeCategory);
+
+            // Set up category switching
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.getAttribute('data-category');
+                    activeCategory = category;
+                    
+                    // Update active category styling
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Render emojis for the selected category
+                    renderEmojiCategory(category);
+                });
+            });
+
+            // Set up emoji search
+            emojiSearch.addEventListener('input', searchEmojis);
+        }
+
+        // Toggle emoji picker visibility
+        function toggleEmojiPicker() {
+            const isVisible = emojiPicker.style.display === 'flex';
+            emojiPicker.style.display = isVisible ? 'none' : 'flex';
+        }
+
+        // Render emojis for a specific category
+        function renderEmojiCategory(category) {
+            emojiList.innerHTML = '';
+            
+            emojiData[category].forEach(item => {
+                const emojiItem = document.createElement('div');
+                emojiItem.classList.add('emoji-item');
+                emojiItem.setAttribute('title', item.description);
+                emojiItem.textContent = item.emoji;
+                
+                // Add click event to insert emoji into message input
+                emojiItem.addEventListener('click', () => {
+                    insertEmoji(item.emoji);
+                });
+                
+                emojiList.appendChild(emojiItem);
+            });
+        }
+
+        // Search emojis across all categories
+        function searchEmojis() {
+            const searchTerm = emojiSearch.value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderEmojiCategory(activeCategory);
+                return;
+            }
+            
+            emojiList.innerHTML = '';
+            
+            // Search through all emoji categories
+            Object.values(emojiData).flat().forEach(item => {
+                if (item.description.toLowerCase().includes(searchTerm)) {
+                    const emojiItem = document.createElement('div');
+                    emojiItem.classList.add('emoji-item');
+                    emojiItem.setAttribute('title', item.description);
+                    emojiItem.textContent = item.emoji;
+                    
+                    emojiItem.addEventListener('click', () => {
+                        insertEmoji(item.emoji);
+                    });
+                    
+                    emojiList.appendChild(emojiItem);
+                }
+            });
+        }
+
+        // Insert emoji at cursor position in message input
+        function insertEmoji(emoji) {
+            const cursorPos = messageInput.selectionStart;
+            const text = messageInput.value;
+            const textBefore = text.substring(0, cursorPos);
+            const textAfter = text.substring(cursorPos);
+            
+            // Update input value with emoji inserted at cursor position
+            messageInput.value = textBefore + emoji + textAfter;
+            
+            // Set cursor position after the inserted emoji
+            messageInput.selectionStart = cursorPos + emoji.length;
+            messageInput.selectionEnd = cursorPos + emoji.length;
+            
+            // Focus on the input
+            messageInput.focus();
+            
+            // Hide the emoji picker after selection
+            emojiPicker.style.display = 'none';
+        }
+
+        // Initialize emoji picker when DOM is loaded
+        initEmojiPicker();
     </script>
 </body>
 </html>
