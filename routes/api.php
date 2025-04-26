@@ -25,7 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/register', [RegistrationController::class, 'register']);
-Route::get('/users', [UserController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/users', [UserController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/send-message', [MessageController::class, 'sendMessage']);
 Route::middleware('auth:sanctum')->get('/messages/{conversation_id}', [MessageController::class, 'getMessages']);
 Route::middleware('auth:sanctum')->post('/conversations', [ConversationController::class, 'getOrCreate']);
