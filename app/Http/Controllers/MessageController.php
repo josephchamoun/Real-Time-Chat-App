@@ -7,18 +7,20 @@ use App\Models\User;
 use App\Models\Message;
 use App\Models\Conversation;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\NewMessageNotification;
 
 class MessageController extends Controller
 {
+
     public function sendMessage(Request $request)
     {
         $request->validate([
             'message' => 'required|string',
             'conversation_id' => 'required|exists:conversations,id',
         ]);
-
+    
         $user = auth()->user() ?? User::find(1); // Fallback for development
-        
+    
         // Verify user belongs to this conversation
         $isParticipant = DB::table('user_conversation')
             ->where('user_id', $user->id)
@@ -30,26 +32,48 @@ class MessageController extends Controller
                 'message' => 'You are not authorized to post in this conversation'
             ], 403);
         }
-
-        // Create the message in the database
+    
+        // Create the message
         $message = $user->messages()->create([
             'message' => $request->message,
             'conversation_id' => $request->conversation_id,
         ]);
-
-        // Send the message to Node.js server
-        Http::post('http://localhost:3000/broadcast', [
+    
+        // Send to Node.js server (Socket.IO)
+        //
+        //
+        //
+        //
+        //
+        Http::post('https://d9bc-94-72-152-229.ngrok-free.app/broadcast', [
             'message' => $message->message,
             'conversation_id' => $message->conversation_id,
             'user_id' => $user->id,
             'created_at' => $message->created_at->toISOString(),
         ]);
-
+    
+        // 🔔 Send FCM Notification to the other participant
+        $otherUser = DB::table('user_conversation')
+            ->where('conversation_id', $request->conversation_id)
+            ->where('user_id', '!=', $user->id)
+            ->first();
+    
+        if ($otherUser) {
+            $recipient = User::find($otherUser->user_id);
+            if ($recipient && $recipient->fcm_token) {
+                $recipient->notify(new NewMessageNotification(
+                    "New message from {$user->name}",
+                    $request->message
+                ));
+            }
+        }
+    
         return response()->json([
             'message' => 'Message sent successfully',
             'data' => $message,
         ], 201);
     }
+    
     
     public function getMessages($conversation_id)
 {

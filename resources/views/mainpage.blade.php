@@ -245,6 +245,7 @@
     </div>
 
     <script>
+        const baseUrl = "{{ config('ngrok.url') }}";
         // Check authentication on page load
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
@@ -289,7 +290,7 @@
             
             try {
                 // Make API request
-                const response = await fetch('http://127.0.0.1:8000/api/users', {
+                const response = await fetch(`${baseUrl}/api/users`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

@@ -188,6 +188,7 @@
   </div>
 
   <script>
+    const baseUrl = "{{ config('ngrok.url') }}";
     document.getElementById('registerForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       
@@ -216,7 +217,7 @@
       }
       
       try {
-        const response = await fetch('http://localhost:8000/api/register', {
+        const response = await fetch(`${baseUrl}/api/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

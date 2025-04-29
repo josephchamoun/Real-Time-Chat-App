@@ -7,6 +7,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,5 +32,6 @@ Route::middleware('auth:sanctum')->get('/messages/{conversation_id}', [MessageCo
 Route::middleware('auth:sanctum')->post('/conversations', [ConversationController::class, 'getOrCreate']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
+Route::post('/save-token', [NotificationController::class, 'saveToken']);
 
 

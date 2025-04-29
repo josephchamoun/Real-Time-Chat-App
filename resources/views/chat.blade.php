@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="/js/socket.io.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
@@ -509,8 +511,10 @@
         </div>
     </div>
 
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    
+
     <script>
+        const baseUrl = "{{ config('ngrok.url') }}";
         // Get the user ID from the URL
         const pathParts = window.location.pathname.split('/');
         const otherUserId = parseInt(pathParts[pathParts.length - 1]);
@@ -521,7 +525,17 @@
         let otherUserName = 'User'; // Store the name of the other user
 
         // Connect to Socket.IO server
-        const socket = io("http://localhost:3000");
+        //
+        //
+        //
+        //
+        //
+        const socket = io("https://d9bc-94-72-152-229.ngrok-free.app", {
+            transports: ['websocket'],
+            auth: {
+                token: localStorage.getItem('token') || ''
+            }
+        });
 
         // DOM elements
         const chatMessages = document.getElementById('chat-messages');
@@ -580,7 +594,7 @@
             try {
                 const token = localStorage.getItem('token') || '';
 
-                const response = await fetch('http://127.0.0.1:8000/api/conversations', {
+                const response = await fetch(`${baseUrl}/api/conversations`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -695,7 +709,7 @@
         async function fetchReceiverName() {
             try {
                 const token = localStorage.getItem('token') || '';
-                const response = await fetch(`http://127.0.0.1:8000/api/users/${otherUserId}`, {
+                const response = await fetch(`${baseUrl}/api/users/${otherUserId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -742,7 +756,7 @@
                 chatMessages.innerHTML = '<div class="loading-indicator">Loading messages...</div>';
 
                 const token = localStorage.getItem('token') || '';
-                const response = await fetch(`http://127.0.0.1:8000/api/messages/${conversationId}`, {
+                const response = await fetch(`${baseUrl}/api/messages/${conversationId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -801,7 +815,7 @@
             try {
                 const token = localStorage.getItem('token') || '';
 
-                const response = await fetch('http://127.0.0.1:8000/api/send-message', {
+                const response = await fetch(`${baseUrl}/api/send-message`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
