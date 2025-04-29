@@ -50,6 +50,7 @@ class ConversationController extends Controller
             }
             
             return response()->json([
+                'message' => 'Conversation created successfully',
                 'conversation' => $conversation,
             ], 200);
             
